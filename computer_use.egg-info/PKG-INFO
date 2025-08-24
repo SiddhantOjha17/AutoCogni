@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: computer-use
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: pydantic
+Requires-Dist: langgraph
+Requires-Dist: mem0ai
+Requires-Dist: httpx
+Requires-Dist: python-dotenv
+Requires-Dist: requests
+Requires-Dist: pyautogui
+Requires-Dist: pynput
+Requires-Dist: playwright
+Requires-Dist: openai

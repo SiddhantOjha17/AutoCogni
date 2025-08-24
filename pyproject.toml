@@ -1,0 +1,21 @@
+[project]
+name = "computer-use"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "langgraph",
+    "mem0ai",
+    "httpx",
+    "python-dotenv",
+    "requests",
+    "pyautogui",
+    "pynput",
+    "playwright",
+    "openai",
+    "python-multipart>=0.0.20",
+]

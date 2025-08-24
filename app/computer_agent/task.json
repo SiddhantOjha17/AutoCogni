@@ -1,0 +1,7 @@
+{
+  "id": "weather-task-001",
+  "goal": "Find the current temperature in Mumbai, India",
+  "website": {
+    "url": "https://www.google.com"
+  }
+}

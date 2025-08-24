@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+langgraph
+mem0ai
+httpx
+python-dotenv
+requests
+pyautogui
+pynput
+playwright
+openai
