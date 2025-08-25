@@ -9,18 +9,19 @@ API_URL = "http://localhost:8000/v1/agent/execute"
 async def send_cycle_to_api(
     session_id: str,
     goal: str,
-    screenshot_bytes: bytes
+    # screenshot_bytes: bytes
 ) -> Dict[str, Any]:
     """
     Sends the agent's state to the server and gets the next action.
     """
-    files = {"screenshot": ("screenshot.png", screenshot_bytes, "image/png")}
+    # files = {"screenshot": ("screenshot.png", screenshot_bytes, "image/png")}
     data = {"session_id": session_id, "goal": goal}
 
     async with httpx.AsyncClient(timeout=120.0) as client:
         try:
             print("Sending data to API...")
-            response = await client.post(API_URL, files=files, data=data)
+            # response = await client.post(API_URL, files=files, data=data)
+            response = await client.post(API_URL, data=data)
             response.raise_for_status()
             return response.json()
         except httpx.RequestError as e:

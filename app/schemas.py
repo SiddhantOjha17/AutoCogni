@@ -19,11 +19,25 @@ class ActionDetail(BaseModel):
 class AgentRequest(BaseModel):
     session_id: str
     goal: str
-    screenshot_base64: str
+    # screenshot_base64: str
 
 class AgentResponse(BaseModel):
     thought: str
     actions: List[ActionDetail]
+
+class AgentResponseData(BaseModel):
+    """Represents the detailed state returned for an in-progress cycle."""
+    thought: Optional[str] = None
+    plan: Optional[list] = None
+    # Include any other fields your client might need
+    vision_analysis: Optional[str] = None
+
+
+class AgentCycleResponse(BaseModel):
+    """The structured response sent back to the client after each cycle."""
+    status: str # Will be "completed" or "in_progress"
+    output: Optional[str] = None # The final answer when completed
+    data: Optional[AgentResponseData] = None # The agent's plan when in_progress
 
 # --- Action Validation Schemas ---
 

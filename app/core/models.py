@@ -106,16 +106,11 @@ class ModelManager:
             "This JSON object must contain three keys:"
             "\n1. 'thought': A brief, high-level analysis of the current situation and your reasoning for the next step."
             "\n2. 'intermediate_goal': A clear and concise description of the specific objective for this single turn."
-            "\n3. 'plan': A list of one or more tool calls to achieve the intermediate goal."
+            "\n3. 'plan': A list of one or more tool calls to achieve the intermediate goal. Group actions together when they logically follow one another."
             "\n\n"
             "Follow all instructions and rules precisely."
         )
                 
-        goal = "Find the current temperature in Mumbai, India"
-        screen_description = "A Google search page with a search bar is visible. The search bar has the CSS selector 'textarea[name=\"q\"]'."
-        history = ["Vision Analysis: The screen shows the Google search homepage."]
-        previous_error = None 
-
         user_prompt = f"""
         **Main User Goal:** "{goal}"
 
@@ -130,32 +125,40 @@ class ModelManager:
 
         **Guiding Principles:**
         1.  **Analyze:** Review the goal, screen, history, and any errors to understand the current situation.
-        2.  **Strategize:** Define the single most logical next step as the `intermediate_goal`. Examples: "Navigate to google.com," "Type the search query into the search bar," or "Extract the final answer."
-        3.  **Plan:** Create a `plan` with a list of actions using only the tools below to achieve the `intermediate_goal`.
-        4.  **Conclude:** If the main goal is visibly achieved on the screen, your plan must use the `finish_task` tool to return the final answer.
+        2.  **Strategize:** Define the single most logical next step as the `intermediate_goal`."
+        3.  **Plan:** Create a `plan` with a list of actions to achieve the `intermediate_goal`.
+        4.  **Efficiency is Key:** If multiple actions can be performed sequentially without needing new visual information (e.g., typing a username, then a password, then clicking login), group them into a single plan.
+        5.  **Conclude:** If the main goal is visibly achieved on the screen, your plan must use the `finish_task` tool.
 
-        **Available Tools (matching playwright_tools.py and other capabilities):**
+        **Available Tools:**
 
-        * **Browser Tools (Playwright):**
+        * ** Tools:**
             * `navigate(url: str)`: Navigates the browser to a specific URL.
             * `click(selector: str)`: Clicks the HTML element matching the CSS selector.
             * `type_text(selector: str, text: str)`: Types text into the HTML element matching the CSS selector.
-
-        * **General Tools:**
-            * `scroll(direction: str)`: Scrolls the page. The `direction` must be "up" or "down".
-
-        * **Control Tools:**
-            * `finish_task(result: str)`: Ends the task and returns the final answer found on the screen.
+            * `finish_task(result: str)`: Ends the task. The `result` parameter **MUST** contain the specific information extracted from the screen that answers the main goal. Do not just describe the screen; provide the actual data.
 
         **Your Task:**
-        Generate a JSON object with 'thought', 'intermediate_goal', and 'plan' keys to progress toward the main goal.
-        The plan should also be a JSON object of the following schema:
-        "plan": [
+        Generate a JSON object with 'thought', 'intermediate_goal', and 'plan' keys. The plan should be a list of one or more actions.
+        **Example of a Multi-Step Plan:**
+        {{
+            "thought": "The login page is visible. I need to fill in the username and password fields and then click the login button.",
+            "intermediate_goal": "Log into the account.",
+            "plan": [
                 {{
-                    "tool": "navigate",
-                    "parameters": {{ "url": "https://www.google.com/search?q=current+temperature+mumbai" }}
+                    "tool": "type_text",
+                    "parameters": {{ "selector": "#username", "text": "my_user" }}
+                }},
+                {{
+                    "tool": "type_text",
+                    "parameters": {{ "selector": "#password", "text": "my_password" }}
+                }},
+                {{
+                    "tool": "click",
+                    "parameters": {{ "selector": "button[type='submit']" }}
                 }}
-                ]
+            ]
+        }}
         """        
 
         messages = [
@@ -204,7 +207,7 @@ class ModelManager:
         **Example Response (Success):**
         {{
             "is_complete": true,
-            "reasoning": "The screen clearly shows the weather forecast for Mumbai, which matches the user's goal."
+            "reasoning": "The screen clearly shows a metal stool on amazon, which matches the user's goal."
         }}
 
         **Example Response (Failure):**
