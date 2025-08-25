@@ -5,7 +5,6 @@ from typing import Optional, Tuple, Literal, List, Dict, Any
 
 # --- Main Agent Schemas ---
 
-ActionType = Literal["click", "type", "scroll", "navigate", "finish", "fail"]
 
 class ActionDetail(BaseModel):
     """Represents a single, executable action with its parameters."""

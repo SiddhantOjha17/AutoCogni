@@ -7,22 +7,13 @@ import uuid
 import json
 from os_tools import ScreenController, InputController
 from api_client import send_cycle_to_api, validate_step_with_api
-from app.computer_agent.playwright_tools import BrowserController
+from app.computer_agent.playwright_tools import browser_controller 
 
-# MODIFIED: Changed from --goal to --task-file
-# @click.command()
-# @click.option(
-#     "--task-file",
-#     type=click.Path(exists=True, dir_okay=False),
-#     required=True,
-#     help="Path to the JSON file describing the task."
-# )
 
 def main(task_file: str):
     """
     Starts the agentic loop based on a JSON task file.
     """
-    # NEW: Load and parse the task file
     try:
         with open(task_file, 'r') as f:
             task_data = json.load(f)
@@ -38,19 +29,17 @@ async def agent_loop(task_data: dict):
     session_id = str(uuid.uuid4())
     screen_controller = ScreenController()
     input_controller = InputController()
-    browser_controller = BrowserController()
     goal = task_data.get("goal", "No goal specified.")
     print(f"Starting agent for goal: '{goal}'")
-    # ... (initial navigation logic remains the same, but now it's redundant as the agent can plan it)
-    # Let's simplify by letting the agent handle navigation from the start.
-    if task_data.get("website") and task_data["website"].get("url"):
-        url = task_data["website"]["url"]
-        await browser_controller.launch()
-        await browser_controller.navigate(url=url)
-        print(f"Waiting for page to load...")
-    else:
-        asyncio.run(browser_controller.launch())
-        print("No starting website specified. Agent will begin from the current screen.")
+
+    # if task_data.get("website") and task_data["website"].get("url"):
+    #     url = task_data["website"]["url"]
+    #     await browser_controller.launch()
+    #     await browser_controller.navigate(url=url)
+    #     print(f"Waiting for page to load...")
+    # else:
+    #     await browser_controller.launch()
+    #     print("No starting website specified. Agent will begin from the current screen.")
     
     cycle_count = 0
     while True:
@@ -71,28 +60,30 @@ async def agent_loop(task_data: dict):
             for i, action_detail in enumerate(actions):
                 action_type = action_detail.get("action_type")
                 print(f"  - Action {i+1}/{len(actions)}: {action_type.upper()}")
-                
-                # NEW: Handle navigate action
+
                 if action_type == "navigate":
                     url = action_detail.get("url")
                     if url:
-                        input_controller.navigate(url)
+                        await browser_controller.navigate(url=url)  # ✅ use singleton
 
                 elif action_type == "click":
-                    coords = action_detail.get("coordinates")
-                    if coords:
-                        input_controller.click(coords[0], coords[1])
+                    selector = action_detail.get("selector")
+                    if selector:
+                        await browser_controller.click(selector=selector)  # ✅
+
                 elif action_type == "type":
+                    selector = action_detail.get("selector")
                     text = action_detail.get("text_to_type")
-                    if text:
-                        input_controller.type_text(text)
+                    if selector and text:
+                        await browser_controller.type_text(selector=selector, text=text)  # ✅
+
                 elif action_type == "finish":
                     print("Goal achieved! Agent is finishing.")
                     return
                 elif action_type == "fail":
                     print(f"Agent failed: {thought}")
                     return
-                
+
                 # Wait for UI to update after each action
                 time.sleep(2)
 
@@ -102,6 +93,6 @@ async def agent_loop(task_data: dict):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             break
-        
+
 if __name__ == "__main__":
     main(task_file="/Users/siddhant/codes/agentic-computer/computer-use/app/computer_agent/task.json")
